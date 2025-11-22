@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useWallet } from '../contexts/WalletContext';
 
 interface TaskbarProps {
     onOpenRegister: () => void;
     onOpenDashboard: () => void;
     onOpenRateAgent: () => void;
+    onOpenWallet: () => void;
 }
 
-export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAgent }: TaskbarProps) {
+export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAgent, onOpenWallet }: TaskbarProps) {
     const [isStartOpen, setIsStartOpen] = useState(false);
+    const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
     const [time, setTime] = useState('');
+    const [copySuccess, setCopySuccess] = useState(false);
+    const { address, isConnected, walletType, chainId, disconnect } = useWallet();
+    const walletMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const updateTime = () => {
@@ -19,6 +25,68 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
         const interval = setInterval(updateTime, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    // Close wallet menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (walletMenuRef.current && !walletMenuRef.current.contains(event.target as Node)) {
+                setIsWalletMenuOpen(false);
+            }
+        };
+
+        if (isWalletMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isWalletMenuOpen]);
+
+    const shortenAddress = (addr: string) => {
+        return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    };
+
+    const getWalletIcon = () => {
+        if (walletType === 'metamask') return '🦊';
+        if (walletType === 'coinbase') return '🔵';
+        return '🔌';
+    };
+
+    const getNetworkName = (chainId: number) => {
+        const networks: { [key: number]: string } = {
+            1: 'Ethereum',
+            5: 'Goerli',
+            11155111: 'Sepolia',
+            137: 'Polygon',
+            80001: 'Mumbai',
+            8453: 'Base',
+            84531: 'Base Goerli',
+            84532: 'Base Sepolia'
+        };
+        return networks[chainId] || `Chain ${chainId}`;
+    };
+
+    const copyAddress = async () => {
+        if (address) {
+            try {
+                await navigator.clipboard.writeText(address);
+                setCopySuccess(true);
+                setTimeout(() => setCopySuccess(false), 2000);
+            } catch (err) {
+                console.error('Failed to copy address:', err);
+            }
+        }
+    };
+
+    const handleDisconnect = () => {
+        disconnect();
+        setIsWalletMenuOpen(false);
+    };
+
+    const handleOpenWallet = () => {
+        onOpenWallet();
+        setIsWalletMenuOpen(false);
+    };
 
     return (
         <div className="fixed bottom-0 left-0 right-0 h-[28px] bg-[#c0c0c0] border-t-2 border-white flex items-center px-1 z-50 shadow-out">
@@ -54,6 +122,77 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
             </div>
 
             <div className="flex-1"></div>
+
+            {/* Wallet Status Indicator with Dropdown Menu */}
+            <div className="relative" ref={walletMenuRef}>
+                {isConnected && address ? (
+                    <>
+                        <button
+                            className="border-2 border-gray-500 border-b-white border-r-white px-2 py-0.5 bg-[#c0c0c0] inset-shadow mr-1 hover:bg-gray-300 flex items-center gap-1 text-xs"
+                            onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
+                            title={`Connected: ${address}\nNetwork: ${getNetworkName(chainId || 0)}`}
+                        >
+                            <span>{getWalletIcon()}</span>
+                            <span className="font-mono">{shortenAddress(address)}</span>
+                        </button>
+
+                        {/* Wallet Dropdown Menu */}
+                        {isWalletMenuOpen && (
+                            <div className="absolute bottom-8 right-0 bg-[#c0c0c0] border-2 border-white border-r-gray-600 border-b-gray-600 p-1 min-w-[200px] shadow-out flex flex-col">
+                                {/* Header */}
+                                <div className="px-2 py-1 border-b border-gray-500 mb-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-lg">{getWalletIcon()}</span>
+                                        <span className="font-bold text-xs capitalize">{walletType}</span>
+                                    </div>
+                                    <div className="text-xs font-mono bg-white border border-gray-400 px-1 py-0.5 break-all">
+                                        {address}
+                                    </div>
+                                    <div className="text-xs mt-1 text-gray-600">
+                                        Network: {getNetworkName(chainId || 0)}
+                                    </div>
+                                </div>
+
+                                {/* Menu Options */}
+                                <button
+                                    className="text-left px-2 py-1 hover:bg-[#000080] hover:text-white flex items-center gap-2 text-xs"
+                                    onClick={copyAddress}
+                                >
+                                    <span>📋</span>
+                                    {copySuccess ? '✓ Copied!' : 'Copy Address'}
+                                </button>
+
+                                <button
+                                    className="text-left px-2 py-1 hover:bg-[#000080] hover:text-white flex items-center gap-2 text-xs"
+                                    onClick={handleOpenWallet}
+                                >
+                                    <span>⚙️</span>
+                                    Wallet Settings
+                                </button>
+
+                                <div className="border-t border-gray-500 my-1"></div>
+
+                                <button
+                                    className="text-left px-2 py-1 hover:bg-[#000080] hover:text-white flex items-center gap-2 text-xs"
+                                    onClick={handleDisconnect}
+                                >
+                                    <span>🔌</span>
+                                    Disconnect
+                                </button>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <button
+                        className="border-2 border-gray-500 border-b-white border-r-white px-2 py-0.5 bg-[#c0c0c0] inset-shadow mr-1 hover:bg-gray-300 flex items-center gap-1 text-xs"
+                        onClick={onOpenWallet}
+                        title="Click to connect wallet"
+                    >
+                        <span>🔌</span>
+                        <span>Not Connected</span>
+                    </button>
+                )}
+            </div>
 
             <div className="border-2 border-gray-500 border-b-white border-r-white px-2 py-0.5 bg-[#c0c0c0] inset-shadow">
                 {time}

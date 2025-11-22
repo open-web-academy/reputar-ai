@@ -6,6 +6,7 @@ import Window from '../components/Window';
 import AgentRegister from '../components/AgentRegister';
 import ReputationDashboard from '../components/ReputationDashboard';
 import RateAgent from '../components/RateAgent';
+import WalletConnect from '../components/WalletConnect';
 
 import DesktopIcon from '../components/DesktopIcon';
 
@@ -13,6 +14,7 @@ export default function Desktop() {
   const [showRegister, setShowRegister] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showRateAgent, setShowRateAgent] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
 
   const bringToFront = (win: string) => setActiveWindow(win);
@@ -21,6 +23,12 @@ export default function Desktop() {
     <div className="w-full h-screen relative overflow-hidden text-black">
       {/* Desktop Icons */}
       <div className="absolute top-4 left-4 flex flex-col gap-6" style={{ zIndex: 10 }}>
+        <DesktopIcon
+          label="Connect Wallet"
+          iconSrc="https://win98icons.alexmeub.com/icons/png/key_win-0.png"
+          onClick={() => { setShowWallet(true); bringToFront('wallet'); }}
+        />
+
         <DesktopIcon
           label="Reputation Hub"
           iconSrc="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-3.png"
@@ -41,13 +49,25 @@ export default function Desktop() {
       </div>
 
       {/* Windows */}
+      {showWallet && (
+        <Window
+          title="Connect Wallet"
+          onClose={() => setShowWallet(false)}
+          isActive={activeWindow === 'wallet'}
+          onFocus={() => bringToFront('wallet')}
+          style={{ top: 50, left: 100, width: 450 }}
+        >
+          <WalletConnect onConnectionSuccess={() => setShowWallet(false)} />
+        </Window>
+      )}
+
       {showRegister && (
         <Window
           title="Agent Registration"
           onClose={() => setShowRegister(false)}
           isActive={activeWindow === 'register'}
           onFocus={() => bringToFront('register')}
-          style={{ top: 50, left: 100 }}
+          style={{ top: 80, left: 150 }}
         >
           <AgentRegister />
         </Window>
@@ -59,7 +79,7 @@ export default function Desktop() {
           onClose={() => setShowDashboard(false)}
           isActive={activeWindow === 'dashboard'}
           onFocus={() => bringToFront('dashboard')}
-          style={{ top: 80, left: 150, width: 700, height: 500 }}
+          style={{ top: 110, left: 200, width: 700, height: 500 }}
         >
           <ReputationDashboard />
         </Window>
@@ -71,7 +91,7 @@ export default function Desktop() {
           onClose={() => setShowRateAgent(false)}
           isActive={activeWindow === 'rateagent'}
           onFocus={() => bringToFront('rateagent')}
-          style={{ top: 110, left: 200 }}
+          style={{ top: 140, left: 250 }}
         >
           <RateAgent />
         </Window>
@@ -81,6 +101,7 @@ export default function Desktop() {
         onOpenRegister={() => { setShowRegister(true); bringToFront('register'); }}
         onOpenDashboard={() => { setShowDashboard(true); bringToFront('dashboard'); }}
         onOpenRateAgent={() => { setShowRateAgent(true); bringToFront('rateagent'); }}
+        onOpenWallet={() => { setShowWallet(true); bringToFront('wallet'); }}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { REPUTATION_HUB_ADDRESS, REPUTATION_HUB_ABI, AGENT_REGISTRY_ADDRESS, AGENT_REGISTRY_ABI } from '../utils/contracts';
+import { useWallet } from '../contexts/WalletContext';
 
 interface AgentReputation {
     address: string;
@@ -14,6 +15,7 @@ export default function ReputationDashboard() {
     const [agents, setAgents] = useState<AgentReputation[]>([]);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
+    const { provider, isConnected } = useWallet();
 
     // Mock data for demonstration
     const getMockAgents = (): AgentReputation[] => {
@@ -57,8 +59,8 @@ export default function ReputationDashboard() {
     };
 
     const loadAgentsReputation = async () => {
-        if (!window.ethereum) {
-            setStatus('Using mock data (MetaMask not detected)');
+        if (!isConnected || !provider) {
+            setStatus('Using mock data (Wallet not connected)');
             setAgents(getMockAgents());
             return;
         }
@@ -67,7 +69,6 @@ export default function ReputationDashboard() {
             setLoading(true);
             setStatus('Loading agents...');
 
-            const provider = new ethers.BrowserProvider(window.ethereum);
             const registryContract = new ethers.Contract(AGENT_REGISTRY_ADDRESS, AGENT_REGISTRY_ABI, provider);
             const reputationContract = new ethers.Contract(REPUTATION_HUB_ADDRESS, REPUTATION_HUB_ABI, provider);
 
@@ -127,7 +128,7 @@ export default function ReputationDashboard() {
 
     useEffect(() => {
         loadAgentsReputation();
-    }, []);
+    }, [isConnected, provider]);
 
     const getScoreColor = (avg: string) => {
         const score = parseFloat(avg);

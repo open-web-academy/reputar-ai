@@ -15,7 +15,9 @@ export default function ReputationDashboard() {
     const [agents, setAgents] = useState<AgentReputation[]>([]);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
-    const { provider, isConnected } = useWallet();
+    const [lookupAddress, setLookupAddress] = useState('');
+    const { provider, isConnected, chainId, address: userAddress } = useWallet();
+    const BASE_SEPOLIA_CHAIN_ID = 84532;
 
     // Mock data for demonstration
     const getMockAgents = (): AgentReputation[] => {
@@ -58,6 +60,70 @@ export default function ReputationDashboard() {
         ];
     };
 
+    const switchNetwork = async () => {
+        if (!window.ethereum) return;
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x14a34' }], // 84532 in hex
+            });
+        } catch (switchError: any) {
+            // This error code indicates that the chain has not been added to MetaMask.
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [
+                            {
+                                chainId: '0x14a34',
+                                chainName: 'Base Sepolia',
+                                rpcUrls: ['https://sepolia.base.org'],
+                                nativeCurrency: {
+                                    name: 'Ether',
+                                    symbol: 'ETH',
+                                    decimals: 18,
+                                },
+                                blockExplorerUrls: ['https://sepolia.basescan.org'],
+                            },
+                        ],
+                    });
+                } catch (addError) {
+                    console.error(addError);
+                }
+            }
+            console.error(switchError);
+        }
+    };
+
+    const checkAgent = async (addressToCheck: string) => {
+        if (!provider) return null;
+
+        try {
+            const registryContract = new ethers.Contract(AGENT_REGISTRY_ADDRESS, [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function tokenURI(uint256 tokenId) view returns (string)"
+            ], provider);
+
+            // Check if address holds an agent NFT (assuming 1 agent = 1 NFT per address model, or at least they own one)
+            const balance = await registryContract.balanceOf(addressToCheck);
+
+            if (balance > 0) {
+                // It's an agent!
+                // Mock reputation for now
+                return {
+                    address: addressToCheck,
+                    average: '0.00',
+                    count: '0',
+                    total: '0',
+                    metadataURI: 'Agent Detected (Metadata TBD)'
+                };
+            }
+        } catch (e) {
+            console.error("Error checking agent:", e);
+        }
+        return null;
+    };
+
     const loadAgentsReputation = async () => {
         if (!isConnected || !provider) {
             setStatus('Using mock data (Wallet not connected)');
@@ -65,70 +131,65 @@ export default function ReputationDashboard() {
             return;
         }
 
+        if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
+            setStatus('Wrong Network: Please switch to Base Sepolia');
+            setAgents(getMockAgents());
+            return;
+        }
+
+        setLoading(true);
+        setStatus('Loading...');
+
         try {
-            setLoading(true);
-            setStatus('Loading agents...');
+            const loadedAgents: AgentReputation[] = [];
 
-            const registryContract = new ethers.Contract(AGENT_REGISTRY_ADDRESS, AGENT_REGISTRY_ABI, provider);
-            const reputationContract = new ethers.Contract(REPUTATION_HUB_ADDRESS, REPUTATION_HUB_ABI, provider);
-
-            // Get all registered agents
-            const agentAddresses = await registryContract.getAllAgents();
-
-            // If no agents found, use mock data
-            if (agentAddresses.length === 0) {
-                setAgents(getMockAgents());
-                setStatus('Showing mock data (no agents registered)');
-                setLoading(false);
-                return;
-            }
-
-            // Fetch reputation for each agent
-            const agentsData: AgentReputation[] = [];
-
-            for (const address of agentAddresses) {
-                try {
-                    const [avg, count, total] = await reputationContract.getReputation(address);
-                    const avgFormatted = (Number(avg) / 100).toFixed(2);
-
-                    // Try to get agent metadata
-                    let metadataURI = '';
-                    try {
-                        const agentInfo = await registryContract.getAgent(address);
-                        metadataURI = agentInfo.metadataURI;
-                    } catch (e) {
-                        // Agent might not have metadata
-                    }
-
-                    agentsData.push({
-                        address,
-                        average: avgFormatted,
-                        count: count.toString(),
-                        total: total.toString(),
-                        metadataURI
-                    });
-                } catch (err) {
-                    console.error(`Error fetching reputation for ${address}:`, err);
+            // 1. Check if current user is an agent
+            if (userAddress) {
+                const myAgent = await checkAgent(userAddress);
+                if (myAgent) {
+                    loadedAgents.push({ ...myAgent, metadataURI: 'Your Agent' });
                 }
             }
 
-            // Sort by average score (descending)
-            agentsData.sort((a, b) => parseFloat(b.average) - parseFloat(a.average));
+            // 2. Add mock agents for demo purposes (since we can't list all real ones yet)
+            const mocks = getMockAgents();
+            // Filter out duplicates if any
+            const uniqueMocks = mocks.filter(m => m.address.toLowerCase() !== userAddress?.toLowerCase());
 
-            setAgents(agentsData);
-            setStatus(`Loaded ${agentsData.length} agents`);
+            setAgents([...loadedAgents, ...uniqueMocks]);
+            setStatus(`Loaded ${loadedAgents.length > 0 ? 'your agent & ' : ''}demo data`);
+
         } catch (err: any) {
-            setStatus(`Using mock data (Error: ${err.message})`);
+            setStatus(`Error: ${err.message}`);
             setAgents(getMockAgents());
-            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
+    const handleLookup = async () => {
+        if (!ethers.isAddress(lookupAddress)) {
+            setStatus('Invalid address');
+            return;
+        }
+        setLoading(true);
+        const agent = await checkAgent(lookupAddress);
+        if (agent) {
+            setAgents(prev => {
+                // Remove if exists then add to top
+                const filtered = prev.filter(a => a.address.toLowerCase() !== lookupAddress.toLowerCase());
+                return [agent, ...filtered];
+            });
+            setStatus(`Found agent: ${lookupAddress.slice(0, 6)}...`);
+        } else {
+            setStatus('Address is not a registered agent');
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
         loadAgentsReputation();
-    }, [isConnected, provider]);
+    }, [isConnected, provider, chainId, userAddress]);
 
     const getScoreColor = (avg: string) => {
         const score = parseFloat(avg);
@@ -144,16 +205,36 @@ export default function ReputationDashboard() {
 
     return (
         <div className="flex flex-col gap-4 h-full">
-            <div className="flex justify-between items-center">
-                <h3 className="font-bold">Agent Reputation Leaderboard</h3>
-                <button onClick={loadAgentsReputation} disabled={loading}>
-                    {loading ? 'Loading...' : 'Refresh'}
-                </button>
+            <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                    <h3 className="font-bold">Agent Reputation Leaderboard</h3>
+                    <div className="flex gap-2">
+                        {isConnected && chainId !== BASE_SEPOLIA_CHAIN_ID && (
+                            <button onClick={switchNetwork} className="bg-red-600 text-white hover:bg-red-700">
+                                Switch to Base Sepolia
+                            </button>
+                        )}
+                        <button onClick={loadAgentsReputation} disabled={loading}>
+                            {loading ? 'Loading...' : 'Refresh'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        placeholder="Check agent address..."
+                        className="flex-1 px-2"
+                        value={lookupAddress}
+                        onChange={(e) => setLookupAddress(e.target.value)}
+                    />
+                    <button onClick={handleLookup} disabled={loading}>Lookup</button>
+                </div>
             </div>
 
             {agents.length === 0 && !loading ? (
                 <div className="p-4 text-center bg-white border-2 border-gray-400 inset-shadow">
-                    <p>No agents registered yet.</p>
+                    <p>No agents found.</p>
                 </div>
             ) : (
                 <div className="flex-1 overflow-auto bg-white border-2 border-gray-400 inset-shadow">
@@ -172,7 +253,7 @@ export default function ReputationDashboard() {
                                 <tr
                                     key={agent.address}
                                     style={{
-                                        backgroundColor: index % 2 === 0 ? 'white' : '#f0f0f0',
+                                        backgroundColor: agent.address.toLowerCase() === userAddress?.toLowerCase() ? '#e0e0ff' : (index % 2 === 0 ? 'white' : '#f0f0f0'),
                                         borderBottom: '1px solid #c0c0c0'
                                     }}
                                 >

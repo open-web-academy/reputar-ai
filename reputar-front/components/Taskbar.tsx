@@ -61,7 +61,9 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
             80001: 'Mumbai',
             8453: 'Base',
             84531: 'Base Goerli',
-            84532: 'Base Sepolia'
+            84532: 'Base Sepolia',
+            0xa516: 'Oasis Emerald',
+            0x5afe: 'Oasis Sapphire'
         };
         return networks[chainId] || `Chain ${chainId}`;
     };
@@ -78,6 +80,44 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
         }
     };
 
+    // Switch network to Sepolia if not already there
+    const switchToSepolia = async () => {
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+            try {
+                await (window as any).ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0xaa36a7' }]
+                });
+            } catch (switchError: any) {
+                if (switchError.code === 4902) {
+                    // Add the chain if missing
+                    await (window as any).ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0xaa36a7',
+                            chainName: 'Sepolia',
+                            nativeCurrency: { name: 'Sepolia ETH', symbol: 'SEP', decimals: 18 },
+                            rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com', 'https://1rpc.io/sepolia', 'https://rpc.sepolia.org'],
+                            blockExplorerUrls: ['https://sepolia.etherscan.io']
+                        }]
+                    });
+                } else {
+                    console.error('Failed to switch network', switchError);
+                }
+            }
+        }
+    };
+
+    // Warning button (appears when not on Sepolia)
+    const sepoliaWarning = chainId && chainId !== 11155111 && (
+        <button
+            className="text-left px-2 py-1 bg-[#ffcccc] hover:bg-[#ff9999] flex items-center gap-2 text-xs"
+            onClick={switchToSepolia}
+        >
+            ⚠️ Switch to Sepolia
+        </button>
+    );
+    // Handle disconnect action
     const handleDisconnect = () => {
         disconnect();
         setIsWalletMenuOpen(false);
@@ -152,7 +192,7 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
                                         Network: {getNetworkName(chainId || 0)}
                                     </div>
                                 </div>
-
+                                {sepoliaWarning}
                                 {/* Menu Options */}
                                 <button
                                     className="text-left px-2 py-1 hover:bg-[#000080] hover:text-white flex items-center gap-2 text-xs"

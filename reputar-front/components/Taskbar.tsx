@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWallet } from '../contexts/WalletContext';
+import NetworkSelector from './NetworkSelector';
 
 interface TaskbarProps {
     onOpenRegister: () => void;
     onOpenDashboard: () => void;
     onOpenRateAgent: () => void;
     onOpenWallet: () => void;
+    onOpenAgentList: () => void;
 }
 
-export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAgent, onOpenWallet }: TaskbarProps) {
+export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAgent, onOpenWallet, onOpenAgentList }: TaskbarProps) {
     const [isStartOpen, setIsStartOpen] = useState(false);
     const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
     const [time, setTime] = useState('');
@@ -62,6 +64,8 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
             8453: 'Base',
             84531: 'Base Goerli',
             84532: 'Base Sepolia',
+            11155111: 'Ethereum Sepolia',
+            421614: 'Arbitrum Sepolia',
             0xa516: 'Oasis Emerald',
             0x5afe: 'Oasis Sapphire'
         };
@@ -157,11 +161,20 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
                             <img src="https://win98icons.alexmeub.com/icons/png/certificate_application-0.png" className="w-4 h-4" />
                             Submit Rating
                         </button>
+                        <button className="text-left px-2 py-1 hover:bg-[#000080] hover:text-white flex items-center gap-2" onClick={() => { onOpenAgentList(); setIsStartOpen(false); }}>
+                            <img src="https://win98icons.alexmeub.com/icons/png/users-0.png" className="w-4 h-4" />
+                            AI Agents List
+                        </button>
                     </div>
                 )}
             </div>
 
             <div className="flex-1"></div>
+
+            {/* Network Selector */}
+            <div className="mr-2">
+              <NetworkSelector />
+            </div>
 
             {/* Wallet Status Indicator with Dropdown Menu */}
             <div className="relative" ref={walletMenuRef}>

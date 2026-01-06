@@ -7,6 +7,7 @@ import AgentRegister from '../components/AgentRegister';
 import ReputationDashboard from '../components/ReputationDashboard';
 import RateAgent from '../components/RateAgent';
 import WalletConnect from '../components/WalletConnect';
+import AgentList from '../components/AgentList';
 
 import DesktopIcon from '../components/DesktopIcon';
 
@@ -15,6 +16,7 @@ export default function Desktop() {
   const [showDashboard, setShowDashboard] = useState(false);
   const [showRateAgent, setShowRateAgent] = useState(false);
   const [showWallet, setShowWallet] = useState(false);
+  const [showAgentList, setShowAgentList] = useState(false);
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
 
   const bringToFront = (win: string) => setActiveWindow(win);
@@ -45,6 +47,12 @@ export default function Desktop() {
           label="Submit Rating"
           iconSrc="https://win98icons.alexmeub.com/icons/png/certificate_application-0.png"
           onClick={() => { setShowRateAgent(true); bringToFront('rateagent'); }}
+        />
+
+        <DesktopIcon
+          label="AI Agents List"
+          iconSrc="https://win98icons.alexmeub.com/icons/png/users-0.png"
+          onClick={() => { setShowAgentList(true); bringToFront('agentlist'); }}
         />
       </div>
 
@@ -97,11 +105,32 @@ export default function Desktop() {
         </Window>
       )}
 
+      {showAgentList && (
+        <Window
+          title="ERC-8004 Agents Registry"
+          onClose={() => setShowAgentList(false)}
+          isActive={activeWindow === 'agentlist'}
+          onFocus={() => bringToFront('agentlist')}
+          style={{ 
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 'min(95vw, 1200px)',
+            height: 'min(90vh, 800px)',
+            maxWidth: '1200px',
+            maxHeight: '800px',
+          }}
+        >
+          <AgentList />
+        </Window>
+      )}
+
       <Taskbar
         onOpenRegister={() => { setShowRegister(true); bringToFront('register'); }}
         onOpenDashboard={() => { setShowDashboard(true); bringToFront('dashboard'); }}
         onOpenRateAgent={() => { setShowRateAgent(true); bringToFront('rateagent'); }}
         onOpenWallet={() => { setShowWallet(true); bringToFront('wallet'); }}
+        onOpenAgentList={() => { setShowAgentList(true); bringToFront('agentlist'); }}
       />
     </div>
   );

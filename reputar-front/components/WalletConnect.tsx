@@ -15,14 +15,15 @@ interface WalletConnectProps {
 export default function WalletConnect({ onConnectionSuccess }: WalletConnectProps) {
     const { address, isConnected, chainId, disconnect, connect, isConnecting, walletType, error } = useWallet();
     const [showWalletOptions, setShowWalletOptions] = useState(false);
-    // Auto-switch to Oasis Emerald testnet after connection if on a different network
+    // Auto-switch to Ethereum Sepolia after connection if on a different network
     useEffect(() => {
-        if (isConnected && chainId && chainId !== 11155111 && typeof window !== 'undefined' && (window as any).ethereum) {
+        const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
+        if (isConnected && chainId && chainId !== ETHEREUM_SEPOLIA_CHAIN_ID && typeof window !== 'undefined' && (window as any).ethereum) {
             const switchNetwork = async () => {
                 try {
                     await (window as any).ethereum.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0xaa36a7' }]
+                        params: [{ chainId: `0x${ETHEREUM_SEPOLIA_CHAIN_ID.toString(16)}` }] // 0xaa36a7
                     });
                 } catch (switchError: any) {
                     if (switchError.code === 4902) {
@@ -30,10 +31,10 @@ export default function WalletConnect({ onConnectionSuccess }: WalletConnectProp
                         await (window as any).ethereum.request({
                             method: 'wallet_addEthereumChain',
                             params: [{
-                                chainId: '0xaa36a7',
-                                chainName: 'Sepolia',
-                                nativeCurrency: { name: 'Sepolia ETH', symbol: 'SEP', decimals: 18 },
-                                rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com', 'https://1rpc.io/sepolia', 'https://rpc.sepolia.org'],
+                                chainId: `0x${ETHEREUM_SEPOLIA_CHAIN_ID.toString(16)}`,
+                                chainName: 'Ethereum Sepolia',
+                                nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+                                rpcUrls: ['https://rpc.sepolia.org'],
                                 blockExplorerUrls: ['https://sepolia.etherscan.io']
                             }]
                         });
@@ -93,11 +94,12 @@ export default function WalletConnect({ onConnectionSuccess }: WalletConnectProp
                         <button
                             className="mt-2 px-2 py-1 bg-[#c0c0c0] border-2 border-gray-500 hover:bg-gray-300"
                             onClick={async () => {
+                                const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
                                 if (typeof window !== 'undefined' && window.ethereum) {
                                     try {
                                         await window.ethereum.request({
                                             method: 'wallet_switchEthereumChain',
-                                            params: [{ chainId: '0xaa36a7' }]
+                                            params: [{ chainId: `0x${ETHEREUM_SEPOLIA_CHAIN_ID.toString(16)}` }] // 0xaa36a7
                                         });
                                     } catch (switchError: any) {
                                         if (switchError.code === 4902) {
@@ -105,10 +107,10 @@ export default function WalletConnect({ onConnectionSuccess }: WalletConnectProp
                                             await window.ethereum.request({
                                                 method: 'wallet_addEthereumChain',
                                                 params: [{
-                                                    chainId: '0xaa36a7',
-                                                    chainName: 'Sepolia',
-                                                    nativeCurrency: { name: 'Sepolia ETH', symbol: 'SEP', decimals: 18 },
-                                                    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com', 'https://1rpc.io/sepolia', 'https://rpc.sepolia.org'],
+                                                    chainId: `0x${ETHEREUM_SEPOLIA_CHAIN_ID.toString(16)}`,
+                                                    chainName: 'Ethereum Sepolia',
+                                                    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+                                                    rpcUrls: ['https://rpc.sepolia.org'],
                                                     blockExplorerUrls: ['https://sepolia.etherscan.io']
                                                 }]
                                             });
@@ -119,7 +121,7 @@ export default function WalletConnect({ onConnectionSuccess }: WalletConnectProp
                                 }
                             }}
                         >
-                            Switch to Sepolia
+                            Switch to Ethereum Sepolia
                         </button>
                     )}
 

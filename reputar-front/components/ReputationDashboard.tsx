@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { REPUTATION_HUB_ADDRESS, REPUTATION_HUB_ABI, AGENT_REGISTRY_ADDRESS, AGENT_REGISTRY_ABI } from '../utils/contracts';
+import { REPUTATION_HUB_ADDRESS, REPUTATION_HUB_ABI, AGENT_REGISTRY_ADDRESS, AGENT_REGISTRY_ABI, ETHEREUM_SEPOLIA_CHAIN_ID } from '../utils/contracts';
 import { useWallet } from '../contexts/WalletContext';
 
 interface AgentReputation {
@@ -17,7 +17,6 @@ export default function ReputationDashboard() {
     const [status, setStatus] = useState('');
     const [lookupAddress, setLookupAddress] = useState('');
     const { provider, isConnected, chainId, address: userAddress } = useWallet();
-    const BASE_SEPOLIA_CHAIN_ID = 84532;
 
     // Mock data for demonstration
     const getMockAgents = (): AgentReputation[] => {
@@ -65,7 +64,7 @@ export default function ReputationDashboard() {
         try {
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x14a34' }], // 84532 in hex
+                params: [{ chainId: `0x${ETHEREUM_SEPOLIA_CHAIN_ID.toString(16)}` }], // 11155111 in hex = 0xaa36a7
             });
         } catch (switchError: any) {
             // This error code indicates that the chain has not been added to MetaMask.
@@ -75,15 +74,15 @@ export default function ReputationDashboard() {
                         method: 'wallet_addEthereumChain',
                         params: [
                             {
-                                chainId: '0x14a34',
-                                chainName: 'Base Sepolia',
-                                rpcUrls: ['https://sepolia.base.org'],
+                                chainId: `0x${ETHEREUM_SEPOLIA_CHAIN_ID.toString(16)}`,
+                                chainName: 'Ethereum Sepolia',
+                                rpcUrls: ['https://rpc.sepolia.org'],
                                 nativeCurrency: {
                                     name: 'Ether',
                                     symbol: 'ETH',
                                     decimals: 18,
                                 },
-                                blockExplorerUrls: ['https://sepolia.basescan.org'],
+                                blockExplorerUrls: ['https://sepolia.etherscan.io'],
                             },
                         ],
                     });
@@ -131,8 +130,8 @@ export default function ReputationDashboard() {
             return;
         }
 
-        if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
-            setStatus('Wrong Network: Please switch to Base Sepolia');
+        if (chainId !== ETHEREUM_SEPOLIA_CHAIN_ID) {
+            setStatus('Wrong Network: Please switch to Ethereum Sepolia');
             setAgents(getMockAgents());
             return;
         }
@@ -209,9 +208,9 @@ export default function ReputationDashboard() {
                 <div className="flex justify-between items-center">
                     <h3 className="font-bold">Agent Reputation Leaderboard</h3>
                     <div className="flex gap-2">
-                        {isConnected && chainId !== BASE_SEPOLIA_CHAIN_ID && (
+                        {isConnected && chainId !== ETHEREUM_SEPOLIA_CHAIN_ID && (
                             <button onClick={switchNetwork} className="bg-red-600 text-white hover:bg-red-700">
-                                Switch to Base Sepolia
+                                Switch to Ethereum Sepolia
                             </button>
                         )}
                         <button onClick={loadAgentsReputation} disabled={loading}>

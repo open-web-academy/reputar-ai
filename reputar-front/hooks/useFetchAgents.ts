@@ -203,20 +203,20 @@ async function fetchAgentMetadata(uri: string, agentId: string): Promise<AgentMe
   }
   
   // Procesar metadata del JSON exitosamente descargado
-  const metadata: AgentMetadata = {};
+  const metadata: AgentMetadata = {
+    name: 'Unknown',
+    description: '',
+    endpoints: []
+  };
   
   // Name
   if (data.name !== undefined && data.name !== null && data.name !== '') {
     metadata.name = String(data.name);
-  } else {
-    metadata.name = 'Unknown';
   }
   
   // Description
   if (data.description !== undefined && data.description !== null && data.description !== '') {
     metadata.description = String(data.description);
-  } else {
-    metadata.description = '';
   }
   
   // Image (procesar con gateway)

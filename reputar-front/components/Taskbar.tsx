@@ -56,13 +56,12 @@ export default function Taskbar({ onOpenRegister, onOpenDashboard, onOpenRateAge
         const networks: { [key: number]: string } = {
             1: 'Ethereum',
             5: 'Goerli',
-            11155111: 'Sepolia',
+            11155111: 'Ethereum Sepolia',
             137: 'Polygon',
             80001: 'Mumbai',
             8453: 'Base',
             84531: 'Base Goerli',
             84532: 'Base Sepolia',
-            11155111: 'Ethereum Sepolia',
             421614: 'Arbitrum Sepolia',
             0xa516: 'Oasis Emerald',
             0x5afe: 'Oasis Sapphire'

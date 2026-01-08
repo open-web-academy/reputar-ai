@@ -208,7 +208,7 @@ export default function RateAgent() {
                 // Éxito - Limpiar formulario
                 // ========================================================================
                 setStatus('✅ Rating Submitted!');
-                console.log('✅ Transaction confirmed:', receipt.transactionHash);
+                console.log('✅ Transaction confirmed:', receipt.hash);
                 
                 // Reset form
                 setRateeAgentId('');

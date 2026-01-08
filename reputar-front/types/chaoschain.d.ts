@@ -1,0 +1,2 @@
+declare module '@chaoschain/sdk';
+

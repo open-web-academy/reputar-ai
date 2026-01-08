@@ -75,11 +75,18 @@ export default function Desktop() {
 
       {showDashboard && (
         <Window
-          title="Reputation Hub - Leaderboard"
+          title="Agent Reputation Leaderboard (Multi-Chain)"
           onClose={() => setShowDashboard(false)}
           isActive={activeWindow === 'dashboard'}
           onFocus={() => bringToFront('dashboard')}
-          style={{ top: 110, left: 200, width: 700, height: 500 }}
+          style={{ 
+            top: 110, 
+            left: 200, 
+            width: 'min(95vw, 1200px)', 
+            height: 'min(90vh, 800px)',
+            maxWidth: '1200px',
+            maxHeight: '800px',
+          }}
         >
           <ReputationDashboard />
         </Window>

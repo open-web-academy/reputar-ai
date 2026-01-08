@@ -26,3 +26,94 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
+
+/* Estilos de scrollbar estilo Windows 95 */
+.win95-scrollbar::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+.win95-scrollbar::-webkit-scrollbar-track {
+  background: #c0c0c0;
+  border: 1px inset #808080;
+}
+
+.win95-scrollbar::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border: 2px outset #c0c0c0;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+}
+
+.win95-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d4d0c8;
+}
+
+.win95-scrollbar::-webkit-scrollbar-button {
+  width: 16px;
+  height: 16px;
+  background: #c0c0c0;
+  border: 1px outset #c0c0c0;
+  display: block;
+}
+
+.win95-scrollbar::-webkit-scrollbar-button:vertical:start:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpolygon points='4,6 8,2 12,6' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.win95-scrollbar::-webkit-scrollbar-button:vertical:end:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpolygon points='4,10 8,14 12,10' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Para Firefox */
+.win95-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #808080;
+}
+
+/* Asegurar que window-body permita flexbox correctamente */
+.window-body {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Asegurar que el contenedor .window use flexbox */
+.window {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Grid de agentes - Responsive */
+.agent-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* Responsive: 1 columna en móviles (< 600px) */
+@media (max-width: 600px) {
+  .agent-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Estilo de tarjeta Windows 95 con hover */
+.win95-card {
+  transition: none;
+}
+
+.win95-card:hover {
+  border-color: #ffffff #808080 #808080 #ffffff !important;
+  background-color: #f0f0f0 !important;
+}

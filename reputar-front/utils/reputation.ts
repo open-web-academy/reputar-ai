@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, ContractTransactionResponse, ContractTransactionReceipt } from 'ethers';
 import { 
   REPUTATION_REGISTRY_ADDRESS, 
   REPUTATION_REGISTRY_ABI,
@@ -54,6 +54,12 @@ export interface SubmitRatingResult {
   transactionHash: string;
   success: boolean;
   error?: string;
+}
+
+interface ReputationSummaryResult {
+    count: bigint;
+    averageScore: bigint;
+    [key: string]: unknown;
 }
 
 /**
@@ -208,12 +214,12 @@ export async function rateAgent(
       fileuriString,
       filehashBytes32,
       feedbackAuth
-    );
+    ) as ContractTransactionResponse;
 
     console.log(`Transaction sent: ${tx.hash}`);
     
     // Esperar confirmación
-    const receipt = await tx.wait();
+    const receipt = await tx.wait() as ContractTransactionReceipt | null;
     
     if (receipt && receipt.status === 1) {
       return {
@@ -221,14 +227,15 @@ export async function rateAgent(
         success: true
       };
     } else {
-      throw new Error('Transaction failed');
+      throw new Error('Transaction failed or receipt status is 0');
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error rating agent:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return {
       transactionHash: '',
       success: false,
-      error: error.message || 'Failed to rate agent'
+      error: errorMessage
     };
   }
 }
@@ -280,14 +287,15 @@ export async function getAgentReputation(
       clientAddressArray,
       tag1Bytes32,
       tag2Bytes32
-    );
+    ) as unknown as ReputationSummaryResult;
 
     // getSummary retorna (uint64 count, uint8 averageScore)
+    // Convertir BigInt a Number para Ethers v6
     return {
       averageScore: Number(summary.averageScore),
       count: Number(summary.count)
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error fetching reputation for Agent #${agentId}:`, error);
     return null;
   }

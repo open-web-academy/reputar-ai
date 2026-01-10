@@ -1,5 +1,5 @@
 // ============================================================================
-// ERC-8004 v1.0 Official Implementation - Ethereum Sepolia
+// ERC-8004 v1.1 Official Implementation - Ethereum Sepolia (Jan 2026 Update)
 // ============================================================================
 
 // Network Configuration
@@ -22,11 +22,11 @@ export const ARBITRUM_SEPOLIA_CHAIN_ID = ETHEREUM_SEPOLIA_CHAIN_ID; // Alias
 export const ARBITRUM_SEPOLIA_RPC_URL = ETHEREUM_SEPOLIA_RPC_URL; // Alias
 
 // ============================================================================
-// Contract Addresses (ERC-8004 v1.0)
+// Contract Addresses (ERC-8004 v1.1)
 // ============================================================================
-export const IDENTITY_REGISTRY_ADDRESS = "0x7177a6867296406881E20d6647232314736Dd09A"; // Identity Registry (ERC-8004 v1.0)
-export const REPUTATION_REGISTRY_ADDRESS = "0xB5048e3ef1DA4E04deB6f7d0423D06F63869e322"; // Reputation Registry (ERC-8004 v1.0)
-export const VALIDATION_REGISTRY_ADDRESS = "0x662b40A526cb4017d947e71eAF6753BF3eeE66d8"; // Validation Registry (ERC-8004 v1.0)
+export const IDENTITY_REGISTRY_ADDRESS = "0xaf8390aeeef89a2d60dcf57462c047804cfe4a5"; // Identity Registry (ERC-8004 v1.1)
+export const REPUTATION_REGISTRY_ADDRESS = "0xef1f86681807e7f5ce6f7728e8a81e013c51be9f"; // Reputation Registry (ERC-8004 v1.1)
+export const VALIDATION_REGISTRY_ADDRESS = "0x662b40A526cb4017d947e71eAF6753BF3eeE66d8"; // Validation Registry (ERC-8004 v1.1)
 
 // Legacy addresses (aliases for backward compatibility)
 export const AGENT_REGISTRY_ADDRESS = IDENTITY_REGISTRY_ADDRESS;
@@ -56,18 +56,18 @@ export const ERC8004_REGISTRY_ABI = IDENTITY_REGISTRY_ABI;
 export const AGENT_REGISTRY_ABI = IDENTITY_REGISTRY_ABI;
 
 // ============================================================================
-// Reputation Registry ABI (ERC-8004 v1.0)
+// Reputation Registry ABI (ERC-8004 v1.1)
 // ============================================================================
 export const REPUTATION_REGISTRY_ABI = [
-  // Get reputation summary
-  "function getSummary(uint256 agentId, address[] clientAddresses, bytes32 tag1, bytes32 tag2) external view returns (uint64 count, uint8 averageScore)",
-  // Submit feedback/rating (requires FeedbackAuth signature)
-  "function giveFeedback(uint256 agentId, uint8 score, bytes32 tag1, bytes32 tag2, string fileuri, bytes32 filehash, bytes feedbackAuth) external",
-  // Read all feedback for an agent
-  "function readAllFeedback(uint256 agentId, address[] clientAddresses, bytes32 tag1, bytes32 tag2, bool includeRevoked) external view returns (address[] clients, uint8[] scores, bytes32[] tag1s, bytes32[] tag2s)",
+  // Get reputation summary (ERC-8004 v1.1 - uses string for tags)
+  "function getSummary(uint256 agentId, address[] calldata clientAddresses, string tag1, string tag2) external view returns (uint64 count, uint8 averageScore)",
+  // Submit feedback/rating (ERC-8004 v1.1 - simplified, no feedbackAuth required)
+  "function giveFeedback(uint256 agentId, uint8 score, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) external",
+  // Read all feedback for an agent (ERC-8004 v1.1 - complete signature with all fields)
+  "function readAllFeedback(uint256 agentId, address[] calldata clientAddresses, string tag1, string tag2, bool includeRevoked) external view returns (address[] clients, uint64[] indexes, uint8[] scores, string[] tag1s, string[] tag2s, string[] endpoints, bool[] revokedStatuses)",
   // Events
-  "event FeedbackGiven(uint256 indexed agentId, address indexed rater, uint8 score, bytes32 tag1, bytes32 tag2, string fileuri)",
-  "event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint8 score, bytes32 indexed tag1, bytes32 tag2, string fileuri, bytes32 filehash)"
+  "event FeedbackGiven(uint256 indexed agentId, address indexed rater, uint8 score, string tag1, string tag2, string endpoint)",
+  "event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, uint8 score, string indexed tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)"
 ];
 
 // Alias for backward compatibility

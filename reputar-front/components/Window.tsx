@@ -10,6 +10,12 @@ interface WindowProps {
 }
 
 export default function Window({ title, children, onClose, isActive, onFocus, style }: WindowProps) {
+    // Calcular maxHeight para window-body basado en el maxHeight del contenedor
+    const containerMaxHeight = style?.maxHeight as string | undefined;
+    const windowBodyMaxHeight = containerMaxHeight 
+        ? `calc(${containerMaxHeight} - 30px)` // Restar altura aproximada del title-bar
+        : '70vh';
+
     return (
         <div
             className={`window ${isActive ? 'active' : ''}`}
@@ -38,7 +44,9 @@ export default function Window({ title, children, onClose, isActive, onFocus, st
               style={{
                 flex: '1 1 auto',
                 minHeight: 0,
-                overflow: 'hidden',
+                maxHeight: windowBodyMaxHeight,
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
               }}

@@ -98,7 +98,17 @@ export default function Desktop() {
           onClose={() => setShowRateAgent(false)}
           isActive={activeWindow === 'rateagent'}
           onFocus={() => bringToFront('rateagent')}
-          style={{ top: 140, left: 250 }}
+          style={{ 
+            position: 'fixed',
+            top: '10%',
+            left: '50%',
+            transform: 'translate(-50%, 0)',
+            maxHeight: '85vh',
+            width: 'min(90vw, 500px)',
+            height: 'auto',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
         >
           <RateAgent />
         </Window>

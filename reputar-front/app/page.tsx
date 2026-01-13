@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Taskbar from '../components/Taskbar';
 import Window from '../components/Window';
-import AgentRegister from '../components/AgentRegister';
+import RegisterAgentWindow from '../components/RegisterAgentWindow';
 import ReputationDashboard from '../components/ReputationDashboard';
 import RateAgent from '../components/RateAgent';
 import WalletConnect from '../components/WalletConnect';
@@ -62,15 +62,25 @@ export default function Desktop() {
       )}
 
       {showRegister && (
-        <Window
-          title="Agent Registration"
-          onClose={() => setShowRegister(false)}
-          isActive={activeWindow === 'register'}
-          onFocus={() => bringToFront('register')}
-          style={{ top: 80, left: 150 }}
+        <div
+          style={{
+            position: 'absolute',
+            top: 80,
+            left: 150,
+            width: 600,
+            height: 650,
+            zIndex: activeWindow === 'register' ? 10 : 1,
+          }}
+          onClick={() => bringToFront('register')}
         >
-          <AgentRegister />
-        </Window>
+          <RegisterAgentWindow
+            onSuccess={(agentId) => {
+              console.log('Agent registered successfully with ID:', agentId);
+              // Opcional: mostrar notificación o actualizar dashboard
+            }}
+            onClose={() => setShowRegister(false)}
+          />
+        </div>
       )}
 
       {showDashboard && (

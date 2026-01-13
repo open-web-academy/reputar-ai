@@ -24,7 +24,7 @@ export const ARBITRUM_SEPOLIA_RPC_URL = ETHEREUM_SEPOLIA_RPC_URL; // Alias
 // ============================================================================
 // Contract Addresses (ERC-8004 v1.1)
 // ============================================================================
-export const IDENTITY_REGISTRY_ADDRESS = "0xaf8390aeeef89a2d60dcf57462c047804cfe4a5"; // Identity Registry (ERC-8004 v1.1)
+export const IDENTITY_REGISTRY_ADDRESS = "0xaf8390aeeef89a2d60dcf57462c0478044cfe4a5"; // Identity Registry (ERC-8004 v1.1)
 export const REPUTATION_REGISTRY_ADDRESS = "0xef1f86681807e7f5ce6f7728e8a81e013c51be9f"; // Reputation Registry (ERC-8004 v1.1)
 export const VALIDATION_REGISTRY_ADDRESS = "0x662b40A526cb4017d947e71eAF6753BF3eeE66d8"; // Validation Registry (ERC-8004 v1.1)
 
@@ -45,6 +45,8 @@ export const IDENTITY_REGISTRY_ABI = [
   "function tokenByIndex(uint256 index) external view returns (uint256)",
   // ERC-8004 v1.0 Specific Functions
   "function totalAgents() external view returns (uint256 count)",
+  // Registration function
+  "function register(string calldata agentURI) external returns (uint256 agentId)",
   // ERC-165
   "function supportsInterface(bytes4 interfaceId) external view returns (bool)",
   // Events

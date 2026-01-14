@@ -190,21 +190,52 @@ export default function AgentReviewsList({ agentId }: AgentReviewsListProps) {
             {renderScoreBar(review.score)}
 
             {/* Tag (si existe) */}
-            {review.tag && review.tag.trim() !== '' && (
-              <div
-                style={{
-                  marginTop: '2px',
-                  padding: '1px 3px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #808080',
-                  fontSize: '7px',
-                  display: 'inline-block',
-                  maxWidth: 'fit-content',
-                }}
-              >
-                Tag: {review.tag}
-              </div>
-            )}
+            {(() => {
+              // Convertir tag a string de forma segura
+              let tagString = '';
+              if (review.tag) {
+                if (typeof review.tag === 'string') {
+                  tagString = review.tag;
+                } else if (typeof review.tag === 'object' && review.tag !== null) {
+                  // Si es un objeto, intentar convertirlo a string
+                  if (Array.isArray(review.tag)) {
+                    tagString = review.tag.join(', ');
+                  } else if ('toString' in review.tag && typeof review.tag.toString === 'function') {
+                    tagString = review.tag.toString();
+                  } else {
+                    // Intentar acceder a propiedades comunes
+                    tagString = (review.tag as any).value || (review.tag as any).name || String(review.tag);
+                  }
+                } else {
+                  tagString = String(review.tag);
+                }
+              }
+              
+              // También verificar tag1 y tag2 como fallback
+              if (!tagString || tagString.trim() === '' || tagString === '[object Object]') {
+                if (review.tag1 && typeof review.tag1 === 'string' && review.tag1.trim() !== '') {
+                  tagString = review.tag1;
+                } else if (review.tag2 && typeof review.tag2 === 'string' && review.tag2.trim() !== '') {
+                  tagString = review.tag2;
+                }
+              }
+              
+              return tagString && tagString.trim() !== '' && tagString !== '[object Object]' ? (
+                <div
+                  style={{
+                    marginTop: '2px',
+                    padding: '1px 3px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #808080',
+                    fontSize: '7px',
+                    display: 'inline-block',
+                    maxWidth: 'fit-content',
+                  }}
+                >
+                  Tag: {tagString.trim()}
+                </div>
+              ) : null;
+            })()}
 
             {/* Fileuri / Evidence */}
             {review.fileuri && review.fileuri.trim() !== '' && (

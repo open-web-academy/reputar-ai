@@ -23,7 +23,7 @@ export const NETWORKS: Record<number, NetworkConfig> = {
     rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     blockExplorer: 'https://sepolia.etherscan.io',
     identityRegistry: '0x7177a6867296406881E20d6647232314736Dd09A',
-    reputationRegistry: '0xB5048e3ef1DA4E04deB6f7d0423D06F63869e322',
+    reputationRegistry: '0xef1f86681807e7f5ce6f7728e8a81e013c51be9f',
     deploymentBlock: 6500000
   },
   
@@ -33,7 +33,7 @@ export const NETWORKS: Record<number, NetworkConfig> = {
     rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
     blockExplorer: 'https://sepolia.basescan.org',
     identityRegistry: '0x7177a6867296406881E20d6647232314736Dd09A',
-    reputationRegistry: '0xB5048e3ef1DA4E04deB6f7d0423D06F63869e322',
+    reputationRegistry: '0xef1f86681807e7f5ce6f7728e8a81e013c51be9f',
     deploymentBlock: 16000000
   },
 
@@ -43,7 +43,7 @@ export const NETWORKS: Record<number, NetworkConfig> = {
     rpcUrl: 'https://optimism-sepolia-rpc.publicnode.com',
     blockExplorer: 'https://sepolia-optimism.etherscan.io',
     identityRegistry: '0x7177a6867296406881E20d6647232314736Dd09A',
-    reputationRegistry: '0xB5048e3ef1DA4E04deB6f7d0423D06F63869e322',
+    reputationRegistry: '0xef1f86681807e7f5ce6f7728e8a81e013c51be9f',
     deploymentBlock: 17000000
   },
 
@@ -53,7 +53,7 @@ export const NETWORKS: Record<number, NetworkConfig> = {
     rpcUrl: 'https://sepolia.mode.network',
     blockExplorer: 'https://sepolia.explorer.mode.network',
     identityRegistry: '0x7177a6867296406881E20d6647232314736Dd09A',
-    reputationRegistry: '0xB5048e3ef1DA4E04deB6f7d0423D06F63869e322',
+    reputationRegistry: '0xef1f86681807e7f5ce6f7728e8a81e013c51be9f',
     deploymentBlock: 15000000
   },
 
@@ -63,7 +63,7 @@ export const NETWORKS: Record<number, NetworkConfig> = {
     rpcUrl: 'https://evmrpc-testnet.0g.ai',
     blockExplorer: 'https://testnet.0g.ai',
     identityRegistry: '0x7177a6867296406881E20d6647232314736Dd09A',
-    reputationRegistry: '0xB5048e3ef1DA4E04deB6f7d0423D06F63869e322',
+    reputationRegistry: '0xef1f86681807e7f5ce6f7728e8a81e013c51be9f',
     deploymentBlock: 1
   }
 };

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Agent } from '../hooks/useFetchAgents';
 import { IDENTITY_REGISTRY_ADDRESS } from '../utils/contracts';
 import { useNetwork } from '../contexts/NetworkContext';
 import { getNetworkBlockExplorer, getNetworkName } from '../utils/networks';
 import AgentReviewsList from './AgentReviewsList';
+import { useAgentFeedback } from '../hooks/useAgentFeedback';
 
 interface AgentCardProps {
   agent: Agent;
@@ -21,6 +22,9 @@ export default function AgentCard({ agent, isActive = true }: AgentCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedEndpointIndex, setCopiedEndpointIndex] = useState<number | null>(null);
   const [copiedOwnerAddress, setCopiedOwnerAddress] = useState(false);
+  
+  // Obtener las reviews del hook para calcular el promedio dinámicamente
+  const { reviews } = useAgentFeedback(agent.tokenId);
   
   const blockExplorer = getNetworkBlockExplorer(currentNetworkId) || 'https://sepolia.etherscan.io';
   const networkName = getNetworkName(currentNetworkId);
@@ -39,11 +43,35 @@ export default function AgentCard({ agent, isActive = true }: AgentCardProps) {
                            !agent.name || 
                            agent.name.toLowerCase().includes('metadata error') ||
                            agent.name.toLowerCase() === 'unknown';
-  
-  const reputationScore = agent.reputation !== null && agent.reputation !== undefined 
+
+  // Calcular el promedio y conteo dinámicamente desde las reviews
+  const { averageScore, totalRatings } = useMemo(() => {
+    if (!reviews || reviews.length === 0) {
+      return { averageScore: 0, totalRatings: 0 };
+    }
+    
+    const validScores = reviews
+      .map(r => r.score)
+      .filter(score => !isNaN(score) && score >= 0 && score <= 100);
+    
+    if (validScores.length === 0) {
+      return { averageScore: 0, totalRatings: 0 };
+    }
+    
+    const sum = validScores.reduce((acc, score) => acc + score, 0);
+    const average = Math.round(sum / validScores.length);
+    
+    return {
+      averageScore: average,
+      totalRatings: validScores.length
+    };
+  }, [reviews]);
+
+  // Usar el promedio calculado o el valor del contrato como fallback
+  const reputationScore = totalRatings > 0 ? averageScore : (agent.reputation !== null && agent.reputation !== undefined 
     ? agent.reputation 
-    : (agent.reputationScore || 0);
-  const reputationCount = agent.reputationCount || 0;
+    : (agent.reputationScore || 0));
+  const reputationCount = totalRatings > 0 ? totalRatings : (agent.reputationCount || 0);
 
   const capabilities: string[] = [];
   if (agent.metadata) {

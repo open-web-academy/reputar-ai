@@ -199,9 +199,9 @@ export default function AgentReviewsList({ agentId }: AgentReviewsListProps) {
                 } else if (typeof review.tag === 'object' && review.tag !== null) {
                   // Si es un objeto, intentar convertirlo a string
                   if (Array.isArray(review.tag)) {
-                    tagString = review.tag.join(', ');
-                  } else if ('toString' in review.tag && typeof review.tag.toString === 'function') {
-                    tagString = review.tag.toString();
+                    tagString = (review.tag as any[]).join(', ');
+                  } else if (review.tag && typeof (review.tag as any).toString === 'function') {
+                    tagString = (review.tag as any).toString();
                   } else {
                     // Intentar acceder a propiedades comunes
                     tagString = (review.tag as any).value || (review.tag as any).name || String(review.tag);

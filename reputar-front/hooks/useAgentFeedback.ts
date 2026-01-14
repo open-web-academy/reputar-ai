@@ -162,7 +162,7 @@ export function useAgentFeedback(agentId: number | string): UseAgentFeedbackRetu
         // Si el rango es menor que chunkSize, hacer una sola query
         if (endBlock - fromBlock <= chunkSize) {
           try {
-            const events = await reputationRegistry.queryFilter(filter, fromBlock, endBlock);
+            const events = await reputationRegistry.queryFilter(filter as any, fromBlock, endBlock);
             console.log(`📦 [Feedback] Single chunk query: blocks ${fromBlock} to ${endBlock} (${events.length} events)`);
             return events;
           } catch (err: any) {
@@ -181,7 +181,7 @@ export function useAgentFeedback(agentId: number | string): UseAgentFeedbackRetu
           
           try {
             console.log(`📦 [Feedback] Chunk ${chunkIndex}: querying blocks ${currentFrom} to ${currentTo}...`);
-            const chunkEvents = await reputationRegistry.queryFilter(filter, currentFrom, currentTo);
+            const chunkEvents = await reputationRegistry.queryFilter(filter as any, currentFrom, currentTo);
             console.log(`📦 [Feedback] Chunk ${chunkIndex}: found ${chunkEvents.length} events`);
             allResults.push(...chunkEvents);
           } catch (chunkError: any) {
@@ -201,7 +201,7 @@ export function useAgentFeedback(agentId: number | string): UseAgentFeedbackRetu
       // 1. Buscar NewFeedback events
       try {
         const newFeedbackFilter = reputationRegistry.filters.NewFeedback(agentIdBigInt);
-        const newFeedbackEvents = await queryFilterInChunks(newFeedbackFilter, actualStartBlock, actualEndBlock);
+        const newFeedbackEvents = await queryFilterInChunks(newFeedbackFilter as any, actualStartBlock, actualEndBlock);
         console.log(`📡 [Feedback] Found ${newFeedbackEvents.length} NewFeedback events (across all chunks)`);
         allEvents = allEvents.concat(newFeedbackEvents);
       } catch (newFeedbackError: any) {
@@ -211,7 +211,7 @@ export function useAgentFeedback(agentId: number | string): UseAgentFeedbackRetu
       // 2. Buscar FeedbackGiven events
       try {
         const feedbackGivenFilter = reputationRegistry.filters.FeedbackGiven(agentIdBigInt);
-        const feedbackGivenEvents = await queryFilterInChunks(feedbackGivenFilter, actualStartBlock, actualEndBlock);
+        const feedbackGivenEvents = await queryFilterInChunks(feedbackGivenFilter as any, actualStartBlock, actualEndBlock);
         console.log(`📡 [Feedback] Found ${feedbackGivenEvents.length} FeedbackGiven events (across all chunks)`);
         allEvents = allEvents.concat(feedbackGivenEvents);
       } catch (feedbackGivenError: any) {
